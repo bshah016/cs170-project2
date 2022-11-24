@@ -63,6 +63,36 @@ def forward(filename, num_features):
     print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
           ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
     
+#same code as forward, except instead of adding features, we are just removing the irrelevant ones
+def backward(df, num_features):
+    data = df.copy(deep=True)[:-1]
+    added = set()
+    curr = {}
+    for i in range(1, num_features):
+        added.add(i)
+    for i in range(1, num_features):
+        bsf = 0
+        featuretoadd = 0
+        for j in range(1, num_features):
+            if j in added:
+                #need to create deepcopy so its not changed later
+                currset = copy.deepcopy(added)
+                currset.remove(j)
+                accuracy = leave_one_out_cross_validation(data, currset, num_features)
+                print('Using feature(s) ' + str(currset) + ' accuracy is ' + str(round(accuracy, 3)))
+                if accuracy >= bsf:
+                    bsf = accuracy
+                    bsf_accuracy = accuracy
+                    featuretoadd = j
+        added.remove(featuretoadd)
+        addcopy = copy.deepcopy(added)
+        curr[bsf_accuracy] = addcopy
+        #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
+        print('Feature set ' + str(added) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
+    #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
+    print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
+          ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
+    
 def leave_one_out_cross_validation(data, currset, feature_to_add):
     number_correctly_classfied = 0
     df = data.copy(deep=True)
