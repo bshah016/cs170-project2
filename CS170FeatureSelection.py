@@ -1,39 +1,56 @@
 import csv
 import math
 import copy
-import sys
 import numpy as np
-import time
 import pandas as pd
+import math
+from datetime import datetime
 
 def main():
     print("Type in the name of the file to test: ")
     filename = input()
+    #Used https://docs.python.org/3/library/csv.html
     file = open(filename, 'r')
     s = csv.reader(file, delimiter=' ', skipinitialspace=True)
-    num_features = len(next(s))
-
-    print("Type the number of the algorithm you want to run:\n")
-    print('1. Foward Selection\n')
-    print('2. Backward Elimination\n\n')
-
+    num_features = len(next(s)) - 1
+    print("Type the number of the algorithm you want to run:\n\t1) Foward Selection\n\t2) Backward Elimination\n")
     choice = int( input() )
-
-    fil = pd.read_csv(filename)
-    num_instances = len(fil)
-
-    print('This dataset has ' + num_features + ' (not including the class attribute), with ' + num_instances + ' instances.')
-
+    filecsv = pd.read_csv(filename)
+    num_instances = len(filecsv)
+    print('This dataset has ' + str(num_features) + ' features (not including the class attribute), with ' + str(num_instances) + ' instances.')
+    #https://www.geeksforgeeks.org/how-to-read-text-files-with-pandas/
+    #used read_fwf() because it said in the link above it works better with files of fixed column length, and i think that fits our file format better
     if choice == 1:
-        forward(filename, num_features)
+        df = pd.read_fwf(filename, header=None)
+        first = datetime.now()
+        forward(df, num_features)
+        second = datetime.now()
+        time = second-first
+        if time.total_seconds() < 60:
+            print('Total time taken was approximately ' + str(round(time.total_seconds(), 1)) + ' seconds!')
+        else:
+            seconds = time.total_seconds()
+            minutes = seconds / 60
+            print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
     elif choice == 2:
-        backward(filename, num_features)
+        df = pd.read_fwf(filename, header=None)
+        first = datetime.now()
+        backward(df, num_features)
+        second = datetime.now()
+        time = second-first
+        if time.total_seconds() < 60:
+            print('Total time taken was approximately ' + str(round(time.total_seconds(), 1)) + ' seconds!')
+        else:
+            seconds = time.total_seconds()
+            minutes = seconds / 60
+            print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
 
-def forward(filename, num_features):
+def forward(df, num_features):
     added = set()
     curr = {}
-
-    for i in range(1, num_features):
+    #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
+    data = df.copy(deep=True)[:-1]
+    for k in range(1, num_features):
         bsf = 0
         featuretoadd = 0
         for j in range(1, num_features):
@@ -41,12 +58,6 @@ def forward(filename, num_features):
                 #need to create deepcopy so its not changed later
                 currset = copy.deepcopy(added)
                 currset.add(j)
-                #https://www.geeksforgeeks.org/how-to-read-text-files-with-pandas/
-                #used read_fwf() because it said in the link above it works better with files of fixed column length, and i think that fits our file format better
-                df = pd.read_fwf(filename, header=None)
-                # need to make a copy of the dataframe too
-                ##https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
-                data = df.copy(deep=True)[:-1]
                 accuracy = leave_one_out_cross_validation(data, currset, num_features)
                 print('Using feature(s) ' + str(currset) + ' accuracy is ' + str(round(accuracy, 3)))
                 if accuracy >= bsf:
@@ -58,11 +69,10 @@ def forward(filename, num_features):
         curr[bsf_accuracy] = addcopy
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
         print('Feature set ' + str(added) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
-
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
     print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
           ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
-    
+
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
     data = df.copy(deep=True)[:-1]
@@ -92,7 +102,7 @@ def backward(df, num_features):
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
     print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
           ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
-    
+
 def leave_one_out_cross_validation(data, currset, feature_to_add):
     number_correctly_classfied = 0
     df = data.copy(deep=True)
@@ -123,5 +133,4 @@ def leave_one_out_cross_validation(data, currset, feature_to_add):
             number_correctly_classfied += 1
     accuracy = number_correctly_classfied / int(len(data.index))
     return accuracy
-
 main()
