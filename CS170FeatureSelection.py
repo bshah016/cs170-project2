@@ -102,8 +102,9 @@ def backward(df, num_features):
             # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
             print('Feature set ' + str(currset_copy) + ' has accuracy ' + str(round(accuracy, 3)) + '\n')
         if i == num_features - 1:
-            currset_copy = copy.deepcopy(current_set_of_features)
-            accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+            empty_set = set()
+            currset_copy = copy.deepcopy(empty_set)
+            accuracy = leave_one_out_cross_validation(data, empty_set, num_features)
             # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
             print('Feature set {} has accuracy ' + str(round(accuracy, 3)) + '\n')
             continue
