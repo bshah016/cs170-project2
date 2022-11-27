@@ -12,12 +12,12 @@ def main():
     #Used https://docs.python.org/3/library/csv.html
     file = open(filename, 'r')
     s = csv.reader(file, delimiter=' ', skipinitialspace=True)
-    num_features = len(next(s)) - 1
+    num_features = len(next(s))
     print("Type the number of the algorithm you want to run:\n\t1) Foward Selection\n\t2) Backward Elimination\n")
     choice = int( input() )
     filecsv = pd.read_csv(filename)
     num_instances = len(filecsv)
-    print('This dataset has ' + str(num_features) + ' features (not including the class attribute), with ' + str(num_instances) + ' instances.')
+    print('This dataset has ' + str(num_features - 1) + ' features (not including the class attribute), with ' + str(num_instances) + ' instances.')
     #https://www.geeksforgeeks.org/how-to-read-text-files-with-pandas/
     #used read_fwf() because it said in the link above it works better with files of fixed column length, and i think that fits our file format better
     if choice == 1:
@@ -46,62 +46,95 @@ def main():
             print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
 
 def forward(df, num_features):
-    added = set()
-    curr = {}
+    current_set_of_features = set()
+    accuracy_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
     data = df.copy(deep=True)[:-1]
     for k in range(1, num_features):
+        if k == 1:
+            currset_copy = copy.deepcopy(current_set_of_features)
+            accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+            print('Feature set {} has accuracy ' + str(round(accuracy, 3)) + '\n')
         bsf = 0
         featuretoadd = 0
         for j in range(1, num_features):
-            if j not in added:
+            if j not in current_set_of_features:
                 #need to create deepcopy so its not changed later
-                currset = copy.deepcopy(added)
-                currset.add(j)
-                accuracy = leave_one_out_cross_validation(data, currset, num_features)
-                print('Using feature(s) ' + str(currset) + ' accuracy is ' + str(round(accuracy, 3)))
+                currset_copy = copy.deepcopy(current_set_of_features)
+                currset_copy.add(j)
+                accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+                # if k == 1:
+                #     currset_copy = copy.deepcopy(current_set_of_features)
+                #     accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+                #     # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
+                #     print('Feature set {} has accuracy ' + str(round(accuracy, 3)) + '\n')
+                #     k += 1
+                # else:
+                print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
                 if accuracy >= bsf:
                     bsf = accuracy
                     bsf_accuracy = accuracy
                     featuretoadd = j
-        added.add(featuretoadd)
-        addcopy = copy.deepcopy(added)
-        curr[bsf_accuracy] = addcopy
+        current_set_of_features.add(featuretoadd)
+        curr_set = copy.deepcopy(current_set_of_features)
+        accuracy_list[bsf_accuracy] = curr_set
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-        print('Feature set ' + str(added) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
+        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
+    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
+    max_accuracy = max(accuracy_list.keys())
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
-          ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
+    print('Finished search!! The best feature subset is ' + str(accuracy_list[max_accuracy]) +
+          ' which has an accuracy of ' + str(round(max_accuracy, 3)) + '\n')
 
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
     data = df.copy(deep=True)[:-1]
-    added = set()
-    curr = {}
+    current_set_of_features = set()
+    accuracy_list = {}
     for i in range(1, num_features):
-        added.add(i)
+        current_set_of_features.add(i)
     for i in range(1, num_features):
         bsf = 0
         featuretoadd = 0
+        if i == 1:
+            currset_copy = copy.deepcopy(current_set_of_features)
+            accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+            # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
+            print('Feature set ' + str(currset_copy) + ' has accuracy ' + str(round(accuracy, 3)) + '\n')
+        if i == num_features - 1:
+            currset_copy = copy.deepcopy(current_set_of_features)
+            accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+            # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
+            print('Feature set {} has accuracy ' + str(round(accuracy, 3)) + '\n')
+            continue
         for j in range(1, num_features):
-            if j in added:
+            if j in current_set_of_features:
                 #need to create deepcopy so its not changed later
-                currset = copy.deepcopy(added)
-                currset.remove(j)
-                accuracy = leave_one_out_cross_validation(data, currset, num_features)
-                print('Using feature(s) ' + str(currset) + ' accuracy is ' + str(round(accuracy, 3)))
+                currset_copy = copy.deepcopy(current_set_of_features)
+                currset_copy.remove(j)
+                accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+                # if i == 1:
+                #     currset_copy = copy.deepcopy(current_set_of_features)
+                #     accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
+                #     # print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
+                #     print('Feature set ' + str(currset_copy) + ' has accuracy ' + str(round(accuracy, 3)) + '\n')
+                #     i+=1
+                # else:
+                print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
                 if accuracy >= bsf:
                     bsf = accuracy
                     bsf_accuracy = accuracy
                     featuretoadd = j
-        added.remove(featuretoadd)
-        addcopy = copy.deepcopy(added)
-        curr[bsf_accuracy] = addcopy
+        current_set_of_features.remove(featuretoadd)
+        curr_set = copy.deepcopy(current_set_of_features)
+        accuracy_list[bsf_accuracy] = curr_set
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-        print('Feature set ' + str(added) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
+        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
+    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
+    max_accur = max(accuracy_list.keys())
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(curr[max(curr.keys())]) +
-          ' which has an accuracy of ' + str(round(max(curr.keys()), 3)) + '\n')
+    print('Finished search!! The best feature subset is ' + str(accuracy_list[max_accur]) +
+          ' which has an accuracy of ' + str(round(max_accur, 3)) + '\n')
 
 def leave_one_out_cross_validation(data, currset, feature_to_add):
     number_correctly_classfied = 0
