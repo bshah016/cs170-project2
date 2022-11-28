@@ -46,6 +46,7 @@ def main():
             print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
 
 def forward(df, num_features):
+    #https://www.w3resource.com/python-exercises/sets/python-sets-exercise-1.php
     current_set_of_features = set()
     accuracy_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
@@ -89,6 +90,7 @@ def forward(df, num_features):
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
     data = df.copy(deep=True)[:-1]
+    #https://www.w3resource.com/python-exercises/sets/python-sets-exercise-1.php
     current_set_of_features = set()
     accuracy_list = {}
     for i in range(1, num_features):
