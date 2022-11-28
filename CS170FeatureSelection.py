@@ -75,8 +75,7 @@ def forward(df, num_features):
                     bsf = accuracy
                     featuretoadd = j
         current_set_of_features.add(featuretoadd)
-        curr_set = copy.deepcopy(current_set_of_features)
-        bsf_list[bsf] = curr_set
+        bsf_list[bsf] = copy.deepcopy(current_set_of_features)
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
         print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
@@ -123,8 +122,7 @@ def backward(df, num_features):
                     bsf = accuracy
                     featuretoadd = j
         current_set_of_features.remove(featuretoadd)
-        curr_set = copy.deepcopy(current_set_of_features)
-        bsf_list[bsf] = curr_set
+        bsf_list[bsf] = copy.deepcopy(current_set_of_features)
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
         print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
