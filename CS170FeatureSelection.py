@@ -47,7 +47,7 @@ def main():
 
 def forward(df, num_features):
     current_set_of_features = set()
-    bsf_list = {}
+    accuracy_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
     data = df.copy(deep=True)[:-1]
     for k in range(1, num_features):
@@ -75,18 +75,20 @@ def forward(df, num_features):
                     bsf = accuracy
                     featuretoadd = j
         current_set_of_features.add(featuretoadd)
-        bsf_list[bsf] = copy.deepcopy(current_set_of_features)
+        accuracy_list[bsf] = copy.deepcopy(current_set_of_features)
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
         print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
+    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
+    bsf = max(accuracy_list.keys())
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(bsf_list[bsf]) +
+    print('Finished search!! The best feature subset is ' + str(accuracy_list[bsf]) +
           ' which has an accuracy of ' + str(round(bsf, 3)) + '\n')
 
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
     data = df.copy(deep=True)[:-1]
     current_set_of_features = set()
-    bsf_list = {}
+    accuracy_list = {}
     for i in range(1, num_features):
         current_set_of_features.add(i)
     for i in range(1, num_features):
@@ -122,18 +124,20 @@ def backward(df, num_features):
                     bsf = accuracy
                     featuretoadd = j
         current_set_of_features.remove(featuretoadd)
-        bsf_list[bsf] = copy.deepcopy(current_set_of_features)
+        accuracy_list[bsf] = copy.deepcopy(current_set_of_features)
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
         print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
+    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
+    bsf = max(accuracy_list.keys())
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(bsf_list[bsf]) +
+    print('Finished search!! The best feature subset is ' + str(accuracy_list[bsf]) +
           ' which has an accuracy of ' + str(round(bsf, 3)) + '\n')
 
 def leave_one_out_cross_validation(data, currset, feature_to_add):
     number_correctly_classfied = 0
     df = data.copy(deep=True)
-    # https://stackoverflow.com/questions/13187778/convert-pandas-dataframe-to-numpy-array for easier traversal
-    datadf = df.to_numpy(dtype='float')
+    # https://stackoverflow.com/questions/13187778/convert-pandas-dataframe-to-numpy-array
+    datadf = df.to_numpy(dtype='float', na_value=np.nan)
     # Replace irrelevant features with 0
     for i in range(1, feature_to_add):
         if i not in currset:
