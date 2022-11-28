@@ -46,9 +46,8 @@ def main():
             print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
 
 def forward(df, num_features):
-    #https://www.w3resource.com/python-exercises/sets/python-sets-exercise-1.php
     current_set_of_features = set()
-    accuracy_list = {}
+    bsf_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
     data = df.copy(deep=True)[:-1]
     for k in range(1, num_features):
@@ -74,25 +73,21 @@ def forward(df, num_features):
                 print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
                 if accuracy >= bsf:
                     bsf = accuracy
-                    bsf_accuracy = accuracy
                     featuretoadd = j
         current_set_of_features.add(featuretoadd)
         curr_set = copy.deepcopy(current_set_of_features)
-        accuracy_list[bsf_accuracy] = curr_set
+        bsf_list[bsf] = curr_set
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
-    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
-    max_accuracy = max(accuracy_list.keys())
+        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(accuracy_list[max_accuracy]) +
-          ' which has an accuracy of ' + str(round(max_accuracy, 3)) + '\n')
+    print('Finished search!! The best feature subset is ' + str(bsf_list[bsf]) +
+          ' which has an accuracy of ' + str(round(bsf, 3)) + '\n')
 
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
     data = df.copy(deep=True)[:-1]
-    #https://www.w3resource.com/python-exercises/sets/python-sets-exercise-1.php
     current_set_of_features = set()
-    accuracy_list = {}
+    bsf_list = {}
     for i in range(1, num_features):
         current_set_of_features.add(i)
     for i in range(1, num_features):
@@ -126,24 +121,21 @@ def backward(df, num_features):
                 print('Using feature(s) ' + str(currset_copy) + ' accuracy is ' + str(round(accuracy, 3)))
                 if accuracy >= bsf:
                     bsf = accuracy
-                    bsf_accuracy = accuracy
                     featuretoadd = j
         current_set_of_features.remove(featuretoadd)
         curr_set = copy.deepcopy(current_set_of_features)
-        accuracy_list[bsf_accuracy] = curr_set
+        bsf_list[bsf] = curr_set
         #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf_accuracy, 3)) + '\n')
-    #https://datagy.io/python-get-dictionary-key-with-max-value/#:~:text=The%20simplest%20way%20to%20get,maximum%20value%20of%20any%20iterable.
-    max_accur = max(accuracy_list.keys())
+        print('Feature set ' + str(current_set_of_features) + ' was best, accuracy is ' + str(round(bsf, 3)) + '\n')
     #to avoid spurious precision: https://www.w3schools.com/python/ref_func_round.asp
-    print('Finished search!! The best feature subset is ' + str(accuracy_list[max_accur]) +
-          ' which has an accuracy of ' + str(round(max_accur, 3)) + '\n')
+    print('Finished search!! The best feature subset is ' + str(bsf_list[bsf]) +
+          ' which has an accuracy of ' + str(round(bsf, 3)) + '\n')
 
 def leave_one_out_cross_validation(data, currset, feature_to_add):
     number_correctly_classfied = 0
     df = data.copy(deep=True)
-    # https://stackoverflow.com/questions/13187778/convert-pandas-dataframe-to-numpy-array
-    datadf = df.to_numpy(dtype='float', na_value=np.nan)
+    # https://stackoverflow.com/questions/13187778/convert-pandas-dataframe-to-numpy-array for easier traversal
+    datadf = df.to_numpy(dtype='float')
     # Replace irrelevant features with 0
     for i in range(1, feature_to_add):
         if i not in currset:
