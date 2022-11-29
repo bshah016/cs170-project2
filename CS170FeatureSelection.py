@@ -49,7 +49,7 @@ def forward(df, num_features):
     current_set_of_features = set()
     accuracy_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
-    data = df.copy(deep=True)[:-1]
+    data = df.copy(deep=True)
     for k in range(1, num_features):
         if k == 1:
             currset_copy = copy.deepcopy(current_set_of_features)
@@ -86,7 +86,7 @@ def forward(df, num_features):
 
 #same code as forward, except instead of adding features, we are just removing the irrelevant ones
 def backward(df, num_features):
-    data = df.copy(deep=True)[:-1]
+    data = df.copy(deep=True)
     current_set_of_features = set()
     accuracy_list = {}
     for i in range(1, num_features):
