@@ -57,6 +57,7 @@ def main():
             print('Total time taken was approximately ' + str(round(minutes, 0)) + ' minutes!')
 
 def forward(df, num_features):
+    global NUM_INSTANCES
     current_set_of_features = set()
     accuracy_list = {}
     #Used https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
@@ -65,7 +66,9 @@ def forward(df, num_features):
         if k == 1:
             currset_copy = copy.deepcopy(current_set_of_features)
             accuracy = leave_one_out_cross_validation(data, currset_copy, num_features)
-            print('Feature set {} has accuracy ' + str(round(accuracy, 3)) + '\n')
+            nums = get_max_class(data)
+            default_rate = nums / NUM_INSTANCES
+            print('Feature set {} has accuracy ' + str(round(default_rate, 3)) + '\n')
         bsf = 0
         featuretoadd = 0
         for j in range(1, num_features):
