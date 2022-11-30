@@ -188,6 +188,7 @@ def get_max_class(data):
     one_count = 0
     two_count = 0
     cols = data.iloc[:, 0]
+
     for entry in cols:
         if int(entry) == 1:
             one_count += 1
